@@ -11,17 +11,17 @@ import json
 # -----------------------------
 
 # Path to your CWT images
-DATA_DIR = "/Users/darrylad/Darryl/Projects/datapy/cwt-gen/outputs 0"
+DATA_DIR = "/Users/darrylad/Darryl/Research/Axial Pison Pumps/NoisyData/CWTsnr10dbGaus"
 
 # Path to the trained model (update this to your actual model path)
-MODEL_PATH = "/Users/darrylad/Darryl/Research/Axial Pison Pumps/classification/outputs/20251122_174918/best_model.keras"
+MODEL_PATH = "/Users/darrylad/Darryl/Research/Axial Pison Pumps/classification/outputs/20251122_190827/best_model.keras"
 
 IMAGE_SIZE = (256, 256)
 BATCH_SIZE = 32
 SEED = 456  # Different seed for test split to ensure different data
 
-# Create test outputs directory
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+# Create test outputs directory with human-readable timestamp
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # e.g., 2025-11-22_19-08-25
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "test_outputs", timestamp)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

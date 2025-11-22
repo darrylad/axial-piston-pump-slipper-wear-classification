@@ -1,0 +1,57 @@
+{
+  "10 um": {
+    "support": 88,
+    "true_positives": 0,
+    "false_positives": 0,
+    "false_negatives": 88,
+    "true_negatives": 169,
+    "accuracy": 0.6575875486381323,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0
+  },
+  "100 um": {
+    "support": 27,
+    "true_positives": 0,
+    "false_positives": 0,
+    "false_negatives": 27,
+    "true_negatives": 230,
+    "accuracy": 0.8949416342412452,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0
+  },
+  "45 um": {
+    "support": 57,
+    "true_positives": 4,
+    "false_positives": 0,
+    "false_negatives": 53,
+    "true_negatives": 200,
+    "accuracy": 0.7937743190661478,
+    "precision": 1.0,
+    "recall": 0.07017543859649122,
+    "f1_score": 0.13114754098360656
+  },
+  "75 um": {
+    "support": 71,
+    "true_positives": 1,
+    "false_positives": 0,
+    "false_negatives": 70,
+    "true_negatives": 186,
+    "accuracy": 0.7276264591439688,
+    "precision": 1.0,
+    "recall": 0.014084507042253521,
+    "f1_score": 0.02777777777777778
+  },
+  "Healthy": {
+    "support": 14,
+    "true_positives": 14,
+    "false_positives": 238,
+    "false_negatives": 0,
+    "true_negatives": 5,
+    "accuracy": 0.07392996108949416,
+    "precision": 0.05555555555555555,
+    "recall": 1.0,
+    "f1_score": 0.10526315789473684
+  }
+}

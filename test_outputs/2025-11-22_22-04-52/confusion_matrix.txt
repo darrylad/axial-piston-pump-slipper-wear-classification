@@ -1,0 +1,15 @@
+Confusion Matrix:
+==================================================
+
+Format: Rows = True Class, Columns = Predicted Class
+
+               10 um      100 um       45 um       75 um     Healthy
+--------------------------------------------------------------------
+   10 um          66           0           0           0          22
+  100 um           0          12           0           0          15
+   45 um           0           0          49           0           8
+   75 um           0           0           0          36          35
+ Healthy           0           0           0           0          14
+
+
+Class Names: ['10 um', '100 um', '45 um', '75 um', 'Healthy']

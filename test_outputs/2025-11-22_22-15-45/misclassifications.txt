@@ -1,0 +1,7 @@
+Total misclassified: 2 / 257
+Misclassification rate: 0.78%
+
+All misclassified examples:
+--------------------------------------------------------------------------------
+Sample 109: True=75 um, Predicted=10 um, Confidence=0.4726
+Sample 197: True=75 um, Predicted=Healthy, Confidence=0.5925

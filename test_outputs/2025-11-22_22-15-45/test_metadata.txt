@@ -1,0 +1,13 @@
+Test Run Timestamp: 2025-11-22_22-15-45
+Model Path: /Users/darrylad/Darryl/Research/Axial Pison Pumps/classification/outputs/20251122_190827/best_model.keras
+Data Directory: /Users/darrylad/Darryl/Projects/pyDataManuplation/cwt-gen/CWTsnr30Gaus
+Image Size: (256, 256)
+Batch Size: 32
+Random Seed: 456
+Number of Classes: 5
+Class Names: ['10 um', '100 um', '45 um', '75 um', 'Healthy']
+Total Test Samples: 257
+
+Test Accuracy: 0.9922 (99.22%)
+Test Loss: 0.0341
+Misclassified: 2 / 257

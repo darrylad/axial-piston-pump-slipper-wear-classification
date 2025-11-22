@@ -1,0 +1,4 @@
+Test Loss: 0.8056712746620178
+Test Accuracy: 0.688715934753418
+Test Accuracy (%): 68.87%
+Total Test Samples: 257
