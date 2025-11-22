@@ -1,0 +1,8 @@
+Confusion Matrix:
+[[302   0   0   0   0]
+ [  0  85   0   0   0]
+ [  0   0 193   0   0]
+ [  0   0   0 209   0]
+ [  0   0   0   0  75]]
+
+Class Names Order: ['10 um', '100 um', '45 um', '75 um', 'Healthy']

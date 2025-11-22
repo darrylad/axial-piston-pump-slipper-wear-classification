@@ -1,0 +1,10 @@
+Timestamp: 20251122_174918
+Data Directory: /Users/darrylad/Darryl/Projects/datapy/cwt-gen/outputs 0
+Image Size: (256, 256)
+Batch Size: 32
+Seed: 123
+Number of Classes: 5
+Class Names: ['10 um', '100 um', '45 um', '75 um', 'Healthy']
+Label Counts: {0: 2940, 1: 806, 2: 1837, 3: 2288, 4: 701}
+Class Weights: {0: 0.5831292517006803, 1: 2.1270471464019853, 2: 0.9332607512248231, 3: 0.7493006993006993, 4: 2.4456490727532096}
+Total Epochs Run: 12
