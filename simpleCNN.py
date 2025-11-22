@@ -10,42 +10,29 @@ from datetime import datetime
 # 1. Configuration
 # -----------------------------
 
-# Path to the root directory that contains the 5 class folders
-DATA_DIR = "/Users/darrylad/Darryl/Projects/datapy/cwt-gen/outputs 0"   # <-- change this to the input folder
+# Paths to the three separate folders
+TRAIN_DIR = "/Users/darrylad/Darryl/Projects/pyDataManuplation/outputs/bifurcator/outputs/split-1"
+VAL_DIR   = "/Users/darrylad/Darryl/Projects/pyDataManuplation/outputs/bifurcator/outputs/split-2"
+TEST_DIR  = "/Users/darrylad/Darryl/Projects/pyDataManuplation/outputs/bifurcator/outputs/split-3"
 
-IMAGE_SIZE = (256, 256)           # images are already 256x256
+IMAGE_SIZE = (256, 256)
 BATCH_SIZE = 32
 SEED = 123
 NUM_CLASSES = 5
 
-# Create outputs directory with timestamp
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+# Create outputs directory with human-readable timestamp
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # e.g., 2025-11-22_19-08-25
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "outputs", timestamp)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print(f"Outputs will be saved to: {OUTPUT_DIR}")
 
 # -----------------------------
-# 2. Load train and validation datasets
+# 2. Load datasets from separate folders
 # -----------------------------
-# Here we let Keras do a 80/20 split; later we will further split
-# the validation set into validation + test if needed.
 
 train_ds = tf.keras.utils.image_dataset_from_directory(
-    DATA_DIR,
-    labels="inferred",
-    label_mode="int",           # integer labels 0..4
-    color_mode="rgb",
-    batch_size=BATCH_SIZE,
-    image_size=IMAGE_SIZE,
-    shuffle=True,
-    seed=SEED,
-    validation_split=0.2,       # 80% train, 20% val
-    subset="training",
-)
-
-val_ds = tf.keras.utils.image_dataset_from_directory(
-    DATA_DIR,
+    TRAIN_DIR,
     labels="inferred",
     label_mode="int",
     color_mode="rgb",
@@ -53,17 +40,36 @@ val_ds = tf.keras.utils.image_dataset_from_directory(
     image_size=IMAGE_SIZE,
     shuffle=True,
     seed=SEED,
-    validation_split=0.2,
-    subset="validation",
 )
 
-# Split val_ds into val and test (50/50)
-val_batches = tf.data.experimental.cardinality(val_ds)
-test_ds = val_ds.take(val_batches // 2)
-val_ds  = val_ds.skip(val_batches // 2)
+val_ds = tf.keras.utils.image_dataset_from_directory(
+    VAL_DIR,
+    labels="inferred",
+    label_mode="int",
+    color_mode="rgb",
+    batch_size=BATCH_SIZE,
+    image_size=IMAGE_SIZE,
+    shuffle=False,  # No need to shuffle validation
+)
+
+test_ds = tf.keras.utils.image_dataset_from_directory(
+    TEST_DIR,
+    labels="inferred",
+    label_mode="int",
+    color_mode="rgb",
+    batch_size=BATCH_SIZE,
+    image_size=IMAGE_SIZE,
+    shuffle=False,  # Never shuffle test set
+)
 
 class_names = train_ds.class_names
 print("Class names:", class_names)
+
+# Print dataset sizes
+print(f"\nDataset sizes:")
+print(f"  Training samples: {sum([x.shape[0] for x, _ in train_ds])}")
+print(f"  Validation samples: {sum([x.shape[0] for x, _ in val_ds])}")
+print(f"  Test samples: {sum([x.shape[0] for x, _ in test_ds])}")
 
 # -----------------------------
 # 3. Performance optimizations
@@ -71,24 +77,24 @@ print("Class names:", class_names)
 
 AUTOTUNE = tf.data.AUTOTUNE
 
-def configure_for_performance(ds):
+def configure_for_performance(ds, shuffle=False):
     ds = ds.cache()
-    ds = ds.shuffle(1000, seed=SEED)
+    if shuffle:
+        ds = ds.shuffle(1000, seed=SEED)
     ds = ds.prefetch(buffer_size=AUTOTUNE)
     return ds
 
-train_ds = configure_for_performance(train_ds)
-val_ds   = configure_for_performance(val_ds)
-test_ds  = configure_for_performance(test_ds)
+train_ds = configure_for_performance(train_ds, shuffle=True)
+val_ds   = configure_for_performance(val_ds, shuffle=False)
+test_ds  = configure_for_performance(test_ds, shuffle=False)
 
 # -----------------------------
-# 4. Compute class weights (handle imbalance)
+# 4. Compute class weights (from training set only)
 # -----------------------------
-# Iterate once through the original (un-shuffled) unbatched dataset to count labels.
 
-# Recreate an unbatched dataset for counting
+# Count labels in training set
 count_ds = tf.keras.utils.image_dataset_from_directory(
-    DATA_DIR,
+    TRAIN_DIR,
     labels="inferred",
     label_mode="int",
     color_mode="rgb",
@@ -103,10 +109,9 @@ for _, labels in count_ds:
     label = int(labels.numpy()[0])
     label_counts[label] += 1
 
-print("Label counts:", label_counts)
+print("\nTraining set label counts:", label_counts)
 
 total_samples = sum(label_counts.values())
-# Inverse-frequency class weights:
 class_weights = {
     cls: (total_samples / (NUM_CLASSES * count))
     for cls, count in label_counts.items()
@@ -117,14 +122,11 @@ print("Class weights:", class_weights)
 # -----------------------------
 # 5. Data augmentation (gentle)
 # -----------------------------
-# For CWT images, avoid flips that invert frequency axis. You can still
-# add small random contrast / brightness or tiny zooms along time.
 
 data_augmentation = keras.Sequential(
     [
         layers.RandomBrightness(factor=0.1),
         layers.RandomContrast(factor=0.1),
-        # layers.RandomZoom(0.05)  # optional, keep small
     ]
 )
 
@@ -136,7 +138,7 @@ def make_model(input_shape=IMAGE_SIZE + (3,), num_classes=NUM_CLASSES):
     inputs = keras.Input(shape=input_shape)
 
     x = data_augmentation(inputs)
-    x = layers.Rescaling(1.0 / 255.0)(x)   # scale pixels to [0,1]
+    x = layers.Rescaling(1.0 / 255.0)(x)
 
     # Block 1
     x = layers.Conv2D(32, (3, 3), padding="same")(x)
@@ -211,7 +213,7 @@ history = model.fit(
     train_ds,
     epochs=EPOCHS,
     validation_data=val_ds,
-    class_weight=class_weights,  # important for imbalance
+    class_weight=class_weights,
     callbacks=callbacks,
 )
 
@@ -268,13 +270,15 @@ with open(os.path.join(OUTPUT_DIR, "classification_report.txt"), "w") as f:
 # Save metadata
 with open(os.path.join(OUTPUT_DIR, "run_metadata.txt"), "w") as f:
     f.write(f"Timestamp: {timestamp}\n")
-    f.write(f"Data Directory: {DATA_DIR}\n")
+    f.write(f"Training Directory: {TRAIN_DIR}\n")
+    f.write(f"Validation Directory: {VAL_DIR}\n")
+    f.write(f"Test Directory: {TEST_DIR}\n")
     f.write(f"Image Size: {IMAGE_SIZE}\n")
     f.write(f"Batch Size: {BATCH_SIZE}\n")
     f.write(f"Seed: {SEED}\n")
     f.write(f"Number of Classes: {NUM_CLASSES}\n")
     f.write(f"Class Names: {class_names}\n")
-    f.write(f"Label Counts: {label_counts}\n")
+    f.write(f"Training Label Counts: {label_counts}\n")
     f.write(f"Class Weights: {class_weights}\n")
     f.write(f"Total Epochs Run: {len(history.history['loss'])}\n")
 
